@@ -1,6 +1,7 @@
 import os
 import random
 import csv
+from concurrent.futures import ThreadPoolExecutor
 
 FILES_NAMES = ["first.csv", "second.csv", "third.csv", "fourth.csv", "fifth.csv"]
 CATEGORIES = ["A", "B", "C", "D"]
@@ -14,8 +15,8 @@ def generationFiles():
         with open(filepath, "w", newline="") as file:
             writer = csv.writer(file)
 
-            for _ in range(AMOUNTRECORDS):
-                writer.writerow([random.choice(CATEGORY), random.uniform(0, 10.0)])
+            for _ in range(RECORDS_AMOUNT):
+                writer.writerow([random.choice(CATEGORIES), random.uniform(0, 10.0)])
 
 def printStruct(data):
     if isinstance(data, dict):
@@ -28,30 +29,21 @@ def printStruct(data):
             print()
 
 
-def readDataFromFile():
-    mapList = []
+def readDataFromFile(filename):
+    data = {}
+    filepath = os.path.join(FOLDER, filename)
 
-    for filename in FILES_NAMES:
-        data = {}
-        filepath = os.path.join(FOLDER, filename)
+    with open(filepath, "r", newline="") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if (row[0] in CATEGORIES):
+                key = row[0]
+                value = float(row[1])
+                if key not in data:
+                    data[key] = []
+                data[key].append(value)
 
-        with open(filepath, "r", newline="") as file:
-            reader = csv.reader(file)
-            
-            for row in reader:
-                if (row[0] in CATEGORIES):
-                    key = row[0]
-                    value = float(row[1])
-
-                    if key not in data:
-                        data[key] = []
-                    
-                    data[key].append(value)
-        mapList.append(data)
-
-    #printStruct(mapList)
-
-    return mapList
+    return data
 
 def solveMedian(valuesArray):
     valuesArray = sorted(valuesArray)
@@ -79,8 +71,10 @@ def solveMeanDeviation(valuesArray):
     return meanDeviation
 
 
-#generationFiles()
-mapInputValues = readDataFromFile()
+generationFiles()
+
+with ThreadPoolExecutor() as executor:
+    inputValues = list(executor.map(readDataFromFile, FILES_NAMES))
 
 arrayOutputValues = []
 mapResultValues = {}
@@ -89,9 +83,11 @@ mapFinalResults = {}
 meanDeviation = 0
 medianValue = 0
 
+print()
 print("====== Medians and Mean Deviation ======")
+print()
 
-for item in mapInputValues:
+for item in inputValues:
     mapOutputValues = {}
     for key, value in item.items():
         medianValue = solveMedian(value)
@@ -102,6 +98,7 @@ for item in mapInputValues:
 printStruct(arrayOutputValues)
 
 print("====== Median of medians ======")
+print()
 
 for item in arrayOutputValues:
     for key, value in item.items():
