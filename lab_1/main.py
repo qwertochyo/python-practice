@@ -28,7 +28,6 @@ def printStruct(data):
                 print(f"{key}: {value}")
             print()
 
-
 def readDataFromFile(filename):
     data = {}
     filepath = os.path.join(FOLDER, filename)
