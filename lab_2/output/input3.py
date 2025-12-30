@@ -10,7 +10,7 @@ class Book:
     pages: float
 
 def greet(name: str) -> None:
-    print(f"Hello, {name}not ")
+    print(f"Hell, {name}not ")
 
 def add(x: float, y: float) -> float:
     result = x + y
